@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JÁ FIZ? · Lembrou. Fez. Confirmou.</title>
+<meta name="description" content="Checklists que guardam a confirmação com data e hora.">
+<meta name="theme-color" content="#172554">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--navy:#172554;--navy2:#22336B;--orange:#FF6B35;--green:#16A34A;--green-bg:#ECFDF3;--red:#DC2626;--red-bg:#FEF2F2;--ice:#F8FAFC;--line:#E2E8F0;--muted:#64748B;--text:#0F172A}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#E9EDF5;color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:#fff;position:relative;display:flex;flex-direction:column}
+.top{background:var(--navy);color:#fff;padding:calc(18px + env(safe-area-inset-top)) 20px 18px}
+.top h1{margin:0;font-size:24px}
+.top p{margin:4px 0 0;color:#C7D2FE;font-size:14px}
+.top .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.back{color:#fff;font-size:15px;padding:6px 0;margin-bottom:6px;display:inline-block}
+main{flex:1;padding:18px 18px 110px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.btn{display:block;width:100%;border-radius:999px;padding:15px 18px;font-weight:700;font-size:16px;text-align:center}
+.btn.primary{background:var(--orange);color:#fff}
+.btn.navy{background:var(--navy);color:#fff}
+.btn.ghost{border:2px solid var(--navy);color:var(--navy);background:#fff}
+.btn.small{display:inline-block;width:auto;padding:10px 16px;font-size:14px}
+.muted{color:var(--muted)}
+.badge{display:inline-block;background:var(--orange);color:#fff;font-weight:800;font-size:12px;border-radius:999px;padding:5px 11px;letter-spacing:.5px}
+/* Boas-vindas */
+.welcome{flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 28px calc(30px + env(safe-area-inset-bottom));text-align:center}
+.logo{width:96px;height:96px;border-radius:26px;background:var(--navy);margin:0 auto 22px;display:grid;place-items:center}
+.welcome h1{font-size:40px;margin:0;color:var(--navy);letter-spacing:-.5px}
+.slogan{color:var(--orange);font-weight:800;font-size:18px;margin:8px 0 14px}
+.welcome .gap{height:34px}
+.welcome .btn{margin-bottom:12px}
+.namebox{display:none;text-align:left;margin-top:6px}
+.namebox.on{display:block}
+label{font-size:13px;font-weight:700;color:var(--muted);display:block;margin:14px 0 6px}
+input[type=text],input[type=time],input[type=search],input[type=email]{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;background:#fff}
+input:focus{outline:2px solid var(--orange);border-color:transparent}
+/* Início */
+.progress{background:var(--ice);border-radius:16px;padding:14px 16px;margin-bottom:16px}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .3s}
+.routine{display:flex;align-items:center;gap:12px;border-left:5px solid var(--orange);cursor:pointer}
+.routine.done{border-left-color:var(--green)}
+.routine.later{border-left-color:#94A3B8}
+.routine .info{flex:1}
+.routine b{display:block;font-size:16px}
+.routine small{color:var(--muted);font-size:13px}
+.routine .st{font-weight:800;font-size:13px;color:var(--orange);white-space:nowrap}
+.routine.done .st{color:var(--green)}
+.routine.later .st{color:var(--muted)}
+.section-t{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:20px 2px 10px}
+.empty{text-align:center;padding:30px 10px;color:var(--muted)}
+.fab{position:fixed;bottom:calc(84px + env(safe-area-inset-bottom));right:max(18px,calc(50% - 222px));width:60px;height:60px;border-radius:50%;background:var(--orange);color:#fff;font-size:32px;line-height:60px;text-align:center;box-shadow:0 6px 18px rgba(255,107,53,.45);z-index:5}
+/* Nav */
+nav.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:6}
+nav.tabs button{flex:1;padding:10px 0 12px;font-size:12px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs button.on{color:var(--navy)}
+nav.tabs svg{width:24px;height:24px}
+/* Checklist */
+.item{display:flex;align-items:center;gap:14px;padding:16px;border:1.5px solid var(--line);border-radius:14px;margin-bottom:10px;width:100%;text-align:left;background:#fff}
+.item .box{width:30px;height:30px;border-radius:9px;border:2.5px solid #94A3B8;display:grid;place-items:center;flex:none}
+.item.ok{background:var(--green-bg);border-color:#86EFAC}
+.item.ok .box{background:var(--green);border-color:var(--green)}
+.item .txt{flex:1;font-size:16px;font-weight:600}
+.item .when{font-weight:800;color:var(--green);font-size:14px}
+.item.pend{background:var(--red-bg);border-color:#FECACA}
+.item.pend .when{color:var(--red)}
+.actions{display:flex;gap:10px;margin-top:14px}
+.actions .btn{flex:1;font-size:15px;padding:13px 10px}
+.btn.outline-red{border:2px solid var(--red);color:var(--red);background:#fff}
+/* Nova rotina */
+.days{display:flex;gap:6px;justify-content:space-between}
+.day{width:40px;height:40px;border-radius:50%;border:2px solid var(--navy);font-weight:800;color:var(--navy);background:#fff}
+.day.on{background:var(--navy);color:#fff}
+.itemrow{display:flex;gap:8px;margin-bottom:8px}
+.itemrow input{flex:1}
+.x{width:46px;border-radius:12px;background:var(--ice);font-size:20px;color:var(--muted)}
+.add{color:var(--orange);font-weight:800;padding:8px 0}
+.two{display:flex;gap:12px}
+.two>div{flex:1}
+.seg{display:flex;background:var(--ice);border-radius:12px;padding:4px}
+.seg button{flex:1;padding:10px 4px;border-radius:9px;font-weight:700;font-size:14px;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+/* Histórico */
+.hist{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line)}
+.hist .d{width:48px;color:var(--muted);font-size:13px;font-weight:700}
+.hist .n{flex:1}
+.hist .n small{display:block;color:var(--muted);font-size:12px}
+.hist .h{font-weight:800;color:var(--green)}
+.hist .h.p{color:var(--red)}
+.answer{background:var(--green-bg);border:1.5px solid #86EFAC;border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.answer.no{background:var(--red-bg);border-color:#FECACA}
+.answer small{color:var(--muted);display:block;font-size:13px}
+.answer b{font-size:19px;color:var(--green)}
+.answer.no b{color:var(--red)}
+/* Relatório */
+.big{font-size:52px;font-weight:900;color:var(--green);line-height:1}
+.chart{display:flex;align-items:flex-end;gap:10px;height:150px;margin:22px 4px 6px}
+.chart div{flex:1;background:var(--navy);border-radius:7px 7px 3px 3px;min-height:6px;position:relative}
+.chart div.low{background:var(--orange)}
+.chart div span{position:absolute;top:-20px;left:0;right:0;text-align:center;font-size:11px;font-weight:800;color:var(--muted)}
+.labels{display:flex;gap:10px;margin:0 4px}
+.labels span{flex:1;text-align:center;color:var(--muted);font-size:13px;font-weight:700}
+.hard{background:#FFF1EA;border-radius:14px;padding:14px 16px;margin:18px 0}
+/* Toast e aviso */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));background:var(--navy);color:#fff;border-radius:14px;padding:13px 16px;display:flex;gap:14px;align-items:center;width:calc(100% - 36px);max-width:444px;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast span{flex:1;font-size:14px}
+.toast button{color:var(--orange);font-weight:800}
+.alert{position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:456px;background:#fff;border-radius:16px;box-shadow:0 12px 34px rgba(0,0,0,.28);padding:14px 16px;z-index:30;border-left:6px solid var(--orange)}
+.alert small{color:var(--muted);font-weight:700}
+.alert b{display:block;margin:2px 0 10px;font-size:16px}
+.note{font-size:12px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.5}
+.link{color:var(--navy);font-weight:700;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+"use strict";
+/* ---------- Dados (ficam só neste aparelho) ---------- */
+const KEY = "jafiz:v1";
+const DIAS = ["D", "S", "T", "Q", "Q", "S", "S"];
+const DIAS_NOME = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+const uid = () => Math.random().toString(36).slice(2, 9);
+const pad = n => String(n).padStart(2, "0");
+const dkey = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const hhmm = ts => { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function exemplo() {
+  const r = [
+    { id: uid(), name: "Sair de casa", time: "07:30", days: [1, 2, 3, 4, 5], alert: 0, items: ["Trancar a porta", "Fechar a grade", "Desligar o ferro"] },
+    { id: uid(), name: "Tomar remédio", time: "08:00", days: [0, 1, 2, 3, 4, 5, 6], alert: 0, items: ["Remédio da pressão"] },
+    { id: uid(), name: "Fechar o escritório", time: "18:30", days: [1, 2, 3, 4, 5], alert: 5, items: ["Desligar o ar-condicionado", "Apagar as luzes", "Trancar a porta"] }
+  ].map(x => ({ ...x, items: x.items.map(t => ({ id: uid(), text: t })) }));
+  // Histórico de exemplo dos últimos 6 dias, para o relatório ter dados
+  const log = [];
+  const hoje = new Date();
+  for (let k = 6; k >= 1; k--) {
+    const d = new Date(hoje); d.setDate(d.getDate() - k);
+    r.forEach((rt, ri) => {
+      if (!rt.days.includes(d.getDay())) return;
+      const [h, m] = rt.time.split(":").map(Number);
+      rt.items.forEach((it, ii) => {
+        const falha = (k === 3 && ri === 2 && ii === 2) || (k === 5 && ri === 0 && ii === 2) || (k === 3 && ri === 2 && ii === 0);
+        if (falha) { log.push({ rid: rt.id, iid: it.id, date: dkey(d), ts: null, st: "pend" }); return; }
+        const t = new Date(d); t.setHours(h, m + 1 + ii * 2 + ((k * 7 + ii) % 5), (k * 13 + ii * 7) % 60, 0);
+        log.push({ rid: rt.id, iid: it.id, date: dkey(d), ts: t.getTime(), st: "ok" });
+      });
+    });
+  }
+  return { user: null, routines: r, log, snooze: {} };
+}
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY)) || exemplo(); } catch (e) { S = exemplo(); }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+/* ---------- Regras ---------- */
+const hojeKey = () => dkey(new Date());
+const deHoje = () => S.routines.filter(r => r.days.includes(new Date().getDay())).sort((a, b) => a.time.localeCompare(b.time));
+const reg = (rid, iid, date = hojeKey()) => S.log.find(l => l.rid === rid && l.iid === iid && l.date === date);
+function estado(r) {
+  const ok = r.items.filter(i => reg(r.id, i.id)?.st === "ok").length;
+  return { ok, total: r.items.length, done: ok === r.items.length };
+}
+function confirmar(rid, iid) {
+  const ex = reg(rid, iid);
+  if (ex && ex.st === "ok") return;
+  if (ex) { ex.st = "ok"; ex.ts = Date.now(); } else S.log.push({ rid, iid, date: hojeKey(), ts: Date.now(), st: "ok" });
+  save();
+}
+function desfazer(rid, iid) { S.log = S.log.filter(l => !(l.rid === rid && l.iid === iid && l.date === hojeKey())); save(); }
+
+/* ---------- Ícones ---------- */
+const ic = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+  hist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  rep: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/></svg>',
+  check: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  logo: '<svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="#22C55E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 6.5"/></svg>'
+};
+
+/* ---------- Telas ---------- */
+const app = document.getElementById("app");
+let rota = location.hash.slice(1) || "inicio";
+let novo = null;
+function ir(r) { location.hash = r; }
+window.addEventListener("hashchange", () => { rota = location.hash.slice(1) || "inicio"; render(); window.scrollTo(0, 0); });
+
+function nav(on) {
+  return `<nav class="tabs">
+    <button data-go="inicio" class="${on === "inicio" ? "on" : ""}">${ic.home}Início</button>
+    <button data-go="historico" class="${on === "historico" ? "on" : ""}">${ic.hist}Histórico</button>
+    <button data-go="relatorio" class="${on === "relatorio" ? "on" : ""}">${ic.rep}Relatório</button>
+  </nav>`;
+}
+
+function telaBoasVindas() {
+  return `<div class="welcome">
+    <div class="logo">${ic.logo}</div>
+    <h1>JÁ FIZ?</h1>
+    <div class="slogan">Lembrou. Fez. Confirmou.</div>
+    <div class="muted">Checklists que guardam a confirmação<br>com data e hora</div>
+    <div class="gap"></div>
+    <button class="btn primary" data-act="entrar">Entrar com Google</button>
+    <button class="btn ghost" data-act="entrar">Entrar com e-mail</button>
+    <div class="namebox" id="nb">
+      <label for="nome">Como podemos te chamar?</label>
+      <input type="text" id="nome" placeholder="Seu nome" maxlength="30" autocomplete="given-name">
+      <div style="height:12px"></div>
+      <button class="btn navy" data-act="comecar">Começar</button>
+    </div>
+    <p class="note">Protótipo do trabalho de PPP (UFPI).<br>Seus dados ficam só neste celular (LGPD).</p>
+  </div>`;
+}
+
+function telaInicio() {
+  const lista = deHoje();
+  const tot = lista.reduce((a, r) => a + r.items.length, 0);
+  const ok = lista.reduce((a, r) => a + estado(r).ok, 0);
+  const d = new Date();
+  const outras = S.routines.filter(r => !lista.includes(r));
+  const agora = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const card = r => {
+    const e = estado(r);
+    const cls = e.done ? "done" : r.time > agora ? "later" : "";
+    const st = e.done ? "feito ✓" : r.time > agora ? "agendado" : `${e.ok} de ${e.total}`;
+    return `<div class="card routine ${cls}" data-go="rotina/${r.id}">
+      <div class="info"><b>${esc(r.name)}</b><small>${r.time} · ${e.ok} de ${e.total} confirmados</small></div>
+      <span class="st">${st}</span></div>`;
+  };
+  return `<div class="top"><h1>Olá, ${esc(S.user || "")}!</h1><p>Hoje, ${d.getDate()} de ${MESES[d.getMonth()]} · ${DIAS_NOME[d.getDay()]}</p></div>
+  <main>
+    <div class="progress"><b>${ok} de ${tot} itens confirmados hoje</b><div class="bar"><i style="width:${tot ? (ok / tot) * 100 : 0}%"></i></div></div>
+    ${lista.length ? lista.map(card).join("") : `<div class="empty">Nenhuma rotina para hoje.<br>Toque em + para criar.</div>`}
+    ${outras.length ? `<div class="section-t">Outros dias</div>` + outras.map(r => `<div class="card routine later" data-go="rotina/${r.id}"><div class="info"><b>${esc(r.name)}</b><small>${r.time} · ${r.days.map(i => DIAS[i]).join(" ")}</small></div><span class="st">ver</span></div>`).join("") : ""}
+    <p class="note"><button class="link" data-act="permitir">Ativar avisos neste celular</button></p>
+  </main>
+  <button class="fab" data-go="nova" aria-label="Nova rotina">+</button>
+  ${nav("inicio")}`;
+}
+
+function telaRotina(id) {
+  const r = S.routines.find(x => x.id === id);
+  if (!r) { ir("inicio"); return ""; }
+  const e = estado(r);
+  const hojeTem = r.days.includes(new Date().getDay());
+  const linhas = r.items.map(it => {
+    const l = reg(r.id, it.id);
+    const ok = l?.st === "ok";
+    return `<button class="item ${ok ? "ok" : ""}" data-act="toque" data-r="${r.id}" data-i="${it.id}">
+      <span class="box">${ok ? ic.check : ""}</span><span class="txt">${esc(it.text)}</span>
+      <span class="when">${ok ? hhmm(l.ts) : ""}</span></button>`;
+  }).join("");
+  const sn = S.snooze[r.id] && S.snooze[r.id] > Date.now() ? `Adiado para ${hhmm(S.snooze[r.id])}` : "";
+  return `<div class="top"><button class="back" data-go="inicio">‹ Voltar</button>
+    <div class="row"><div><h1>${esc(r.name)}</h1><p>${r.time} · ${r.days.map(i => DIAS[i]).join(" ")}${hojeTem ? "" : " · não é dia desta rotina"}</p></div></div></div>
+  <main>
+    <div class="progress"><b>${e.ok} de ${e.total} confirmados</b><div class="bar"><i style="width:${(e.ok / e.total) * 100}%"></i></div></div>
+    <p class="muted" style="margin:0 2px 12px;font-size:14px">Toque no item depois de fazer. O app grava a hora.</p>
+    ${linhas}
+    ${e.done ? `<div class="answer"><small>Tudo confirmado</small><b>Pode ir tranquilo ✓</b></div>` : `<div class="actions"><button class="btn ghost" data-act="adiar" data-r="${r.id}">Adiar 10 min</button><button class="btn outline-red" data-act="pendente" data-r="${r.id}">Não fiz</button></div>`}
+    ${sn ? `<p class="note">${sn}</p>` : ""}
+    <p class="note"><button class="link" data-act="apagar" data-r="${r.id}">Excluir rotina</button></p>
+  </main>${nav("")}`;
+}
+
+function telaNova() {
+  if (!novo) novo = { name: "", items: ["", ""], days: [1, 2, 3, 4, 5], time: "07:30", alert: 0 };
+  return `<div class="top"><button class="back" data-act="cancelar">‹ Cancelar</button><h1>Nova rotina</h1><p>Passo único, menos de 1 minuto</p></div>
+  <main>
+    <label for="nnome">Nome</label>
+    <input type="text" id="nnome" placeholder="Ex.: Sair de casa" value="${esc(novo.name)}" maxlength="40">
+    <label>Itens do checklist</label>
+    ${novo.items.map((t, i) => `<div class="itemrow"><input type="text" class="nitem" data-i="${i}" placeholder="Ex.: Trancar a porta" value="${esc(t)}" maxlength="50">${novo.items.length > 1 ? `<button class="x" data-act="tiraitem" data-i="${i}" aria-label="Remover">×</button>` : ""}</div>`).join("")}
+    <button class="add" data-act="maisitem">+ adicionar item</button>
+    <label>Dias</label>
+    <div class="days">${DIAS.map((d, i) => `<button class="day ${novo.days.includes(i) ? "on" : ""}" data-act="dia" data-i="${i}" aria-label="${DIAS_NOME[i]}">${d}</button>`).join("")}</div>
+    <div class="two"><div><label for="nhora">Horário</label><input type="time" id="nhora" value="${novo.time}"></div>
+    <div><label>Aviso</label><div class="seg"><button data-act="alerta" data-i="0" class="${novo.alert === 0 ? "on" : ""}">Na hora</button><button data-act="alerta" data-i="5" class="${novo.alert === 5 ? "on" : ""}">5 min antes</button></div></div></div>
+    <div style="height:24px"></div>
+    <button class="btn primary" data-act="salvar">Salvar rotina</button>
+  </main>`;
+}
+
+function telaHistorico() {
+  const q = (window._q || "").toLowerCase();
+  const nomeItem = l => { const r = S.routines.find(x => x.id === l.rid); const it = r?.items.find(i => i.id === l.iid); return r && it ? { r, it } : null; };
+  const regs = S.log.map(l => ({ l, n: nomeItem(l) })).filter(x => x.n && (!q || x.n.it.text.toLowerCase().includes(q) || x.n.r.name.toLowerCase().includes(q)))
+    .sort((a, b) => b.l.date.localeCompare(a.l.date) || (b.l.ts || 0) - (a.l.ts || 0)).slice(0, 80);
+  // Pergunta rápida: o último registro do item buscado
+  let resp = "";
+  if (q && regs.length) {
+    const x = regs[0];
+    const hoje = x.l.date === hojeKey();
+    resp = x.l.st === "ok"
+      ? `<div class="answer"><small>${esc(x.n.it.text)}: ${hoje ? "hoje" : "última vez"}</small><b>Sim, às ${hhmm(x.l.ts)}${hoje ? "" : " de " + x.l.date.split("-").reverse().slice(0, 2).join("/")} ✓</b></div>`
+      : `<div class="answer no"><small>${esc(x.n.it.text)}</small><b>Ficou pendente</b></div>`;
+  }
+  return `<div class="top"><h1>Histórico</h1><p>Consulte o que você já confirmou</p></div>
+  <main>
+    <input type="search" id="busca" placeholder="Buscar: trancar a porta" value="${esc(window._q || "")}" autocomplete="off">
+    <div style="height:14px"></div>
+    ${resp}
+    ${regs.length ? regs.map(({ l, n }) => {
+      const dd = l.date.split("-");
+      return `<div class="hist"><span class="d">${dd[2]}/${dd[1]}</span><span class="n">${esc(n.it.text)}<small>${esc(n.r.name)}</small></span><span class="h ${l.st === "ok" ? "" : "p"}">${l.st === "ok" ? hhmm(l.ts) : "pendente"}</span></div>`;
+    }).join("") : `<div class="empty">Nada encontrado.</div>`}
+  </main>${nav("historico")}`;
+}
+
+function telaRelatorio() {
+  const hoje = new Date();
+  const dias = [];
+  for (let k = 6; k >= 0; k--) { const d = new Date(hoje); d.setDate(d.getDate() - k); dias.push(d); }
+  const porDia = dias.map(d => {
+    const rs = S.routines.filter(r => r.days.includes(d.getDay()));
+    const tot = rs.reduce((a, r) => a + r.items.length, 0);
+    const ok = S.log.filter(l => l.date === dkey(d) && l.st === "ok").length;
+    return { d, tot, ok: Math.min(ok, tot), p: tot ? Math.round((Math.min(ok, tot) / tot) * 100) : null };
+  });
+  const T = porDia.reduce((a, x) => a + x.tot, 0), O = porDia.reduce((a, x) => a + x.ok, 0);
+  const pct = T ? Math.round((O / T) * 100) : 0;
+  // Hoje ainda está em andamento, então não entra na escolha do dia mais difícil
+  const validos = porDia.filter(x => x.p !== null && dkey(x.d) !== hojeKey());
+  const pior = validos.length ? validos.reduce((a, b) => (b.p < a.p ? b : a)) : null;
+  // Rotina com mais pendências
+  const pend = {};
+  S.log.filter(l => l.st === "pend").forEach(l => { pend[l.rid] = (pend[l.rid] || 0) + 1; });
+  const rPior = S.routines.find(r => r.id === Object.keys(pend).sort((a, b) => pend[b] - pend[a])[0]);
+  return `<div class="top"><div class="row"><div><h1>Sua semana</h1><p>Relatório Premium</p></div><span class="badge">PREMIUM</span></div></div>
+  <main>
+    <div style="display:flex;align-items:center;gap:14px"><span class="big">${pct}%</span><span class="muted">dos itens<br>confirmados nos últimos 7 dias</span></div>
+    <div class="chart">${porDia.map(x => `<div class="${pior && x === pior ? "low" : ""}" style="height:${x.p === null ? 4 : Math.max(x.p, 4)}%"><span>${x.p === null ? "–" : x.p + "%"}</span></div>`).join("")}</div>
+    <div class="labels">${porDia.map(x => `<span>${DIAS[x.d.getDay()]}</span>`).join("")}</div>
+    ${pior ? `<div class="hard"><small class="muted">Dia mais difícil</small><div style="font-weight:800;font-size:18px;margin-top:4px">${DIAS_NOME[pior.d.getDay()]} (${pior.p}% confirmado)${rPior ? `<br><span style="font-weight:600;font-size:15px">Rotina com mais pendências: ${esc(rPior.name)}</span>` : ""}</div></div>` : ""}
+    <button class="btn navy" data-act="exportar">Exportar histórico (CSV)</button>
+    <p class="note">Sem anúncios · rotinas ilimitadas · R$ 4,90/mês<br>(no protótipo o Premium está liberado)</p>
+    <p class="note"><button class="link" data-act="reset">Recomeçar com dados de exemplo</button></p>
+  </main>${nav("relatorio")}`;
+}
+
+function render() {
+  if (!S.user) { app.innerHTML = telaBoasVindas(); return; }
+  if (rota.startsWith("rotina/")) app.innerHTML = telaRotina(rota.split("/")[1]);
+  else if (rota === "nova") app.innerHTML = telaNova();
+  else if (rota === "historico") app.innerHTML = telaHistorico();
+  else if (rota === "relatorio") app.innerHTML = telaRelatorio();
+  else app.innerHTML = telaInicio();
+}
+
+/* ---------- Avisos ---------- */
+let toastT = null;
+function toast(msg, acao, fn) {
+  document.querySelector(".toast")?.remove();
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.innerHTML = `<span>${msg}</span>${acao ? `<button>${acao}</button>` : ""}`;
+  if (acao) el.querySelector("button").onclick = () => { fn(); el.remove(); };
+  document.body.appendChild(el);
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.remove(), 10000);
+}
+function aviso(r) {
+  document.querySelector(".alert")?.remove();
+  const el = document.createElement("div");
+  el.className = "alert";
+  el.innerHTML = `<small>JÁ FIZ? · agora</small><b>${esc(r.name)}: hora de conferir!</b><button class="btn primary small">Abrir checklist</button>`;
+  el.querySelector("button").onclick = () => { el.remove(); ir("rotina/" + r.id); };
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 15000);
+  try {
+    if ("Notification" in window && Notification.permission === "granted") {
+      navigator.serviceWorker?.getRegistration().then(reg => reg ? reg.showNotification("JÁ FIZ?", { body: `${r.name}: hora de conferir!`, icon: "icon-192.png", tag: r.id, data: { url: "#rotina/" + r.id } }) : new Notification("JÁ FIZ?", { body: `${r.name}: hora de conferir!` }));
+    }
+  } catch (e) {}
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+}
+const avisados = new Set();
+function checarHorario() {
+  if (!S.user) return;
+  const d = new Date();
+  const agora = d.getHours() * 60 + d.getMinutes();
+  S.routines.forEach(r => {
+    const [h, m] = r.time.split(":").map(Number);
+    const alvo = h * 60 + m - (r.alert || 0);
+    const chave = r.id + hojeKey();
+    if (r.days.includes(d.getDay()) && agora === alvo && !avisados.has(chave) && !estado(r).done) { avisados.add(chave); aviso(r); }
+    const sn = S.snooze[r.id];
+    if (sn && Date.now() >= sn) { delete S.snooze[r.id]; save(); aviso(r); }
+  });
+}
+setInterval(checarHorario, 15000);
+
+/* ---------- Eventos ---------- */
+app.addEventListener("click", ev => {
+  const go = ev.target.closest("[data-go]");
+  if (go) { ir(go.dataset.go); return; }
+  const b = ev.target.closest("[data-act]");
+  if (!b) return;
+  const a = b.dataset.act;
+  if (a === "entrar") { document.getElementById("nb").classList.add("on"); document.getElementById("nome").focus(); }
+  else if (a === "comecar") {
+    const n = document.getElementById("nome").value.trim();
+    if (!n) { document.getElementById("nome").focus(); return; }
+    S.user = n; save(); ir("inicio"); render();
+  }
+  else if (a === "toque") {
+    const { r, i } = b.dataset;
+    const l = reg(r, i);
+    if (l?.st === "ok") { toast("Item já confirmado. Quer desfazer?", "Desfazer", () => { desfazer(r, i); render(); }); return; }
+    confirmar(r, i); render();
+    toast(`Confirmado às ${hhmm(Date.now())}`, "Desfazer", () => { desfazer(r, i); render(); });
+  }
+  else if (a === "adiar") { S.snooze[b.dataset.r] = Date.now() + 10 * 60000; save(); render(); toast("Aviso adiado por 10 minutos"); }
+  else if (a === "pendente") {
+    const r = S.routines.find(x => x.id === b.dataset.r);
+    r.items.forEach(it => { if (!reg(r.id, it.id)) S.log.push({ rid: r.id, iid: it.id, date: hojeKey(), ts: null, st: "pend" }); });
+    save(); toast("Itens marcados como pendentes"); ir("inicio");
+  }
+  else if (a === "apagar") {
+    if (!confirm("Excluir esta rotina e o histórico dela?")) return;
+    const id = b.dataset.r; S.routines = S.routines.filter(r => r.id !== id); S.log = S.log.filter(l => l.rid !== id); save(); ir("inicio");
+  }
+  else if (a === "maisitem") { lerNova(); novo.items.push(""); render(); const ins = document.querySelectorAll(".nitem"); ins[ins.length - 1].focus(); }
+  else if (a === "tiraitem") { lerNova(); novo.items.splice(+b.dataset.i, 1); render(); }
+  else if (a === "dia") { lerNova(); const i = +b.dataset.i; novo.days = novo.days.includes(i) ? novo.days.filter(x => x !== i) : [...novo.days, i].sort(); render(); }
+  else if (a === "alerta") { lerNova(); novo.alert = +b.dataset.i; render(); }
+  else if (a === "cancelar") { novo = null; ir("inicio"); }
+  else if (a === "salvar") {
+    lerNova();
+    const itens = novo.items.map(t => t.trim()).filter(Boolean);
+    if (!novo.name.trim()) { toast("Dê um nome para a rotina"); document.getElementById("nnome").focus(); return; }
+    if (!itens.length) { toast("Adicione pelo menos um item"); return; }
+    if (!novo.days.length) { toast("Escolha pelo menos um dia"); return; }
+    const r = { id: uid(), name: novo.name.trim(), time: novo.time || "07:30", days: novo.days, alert: novo.alert, items: itens.map(t => ({ id: uid(), text: t })) };
+    S.routines.push(r); save(); novo = null; ir("rotina/" + r.id); toast("Rotina criada. O aviso vai tocar no horário.");
+    pedirPermissao();
+  }
+  else if (a === "permitir") pedirPermissao(true);
+  else if (a === "exportar") exportar();
+  else if (a === "reset") { if (confirm("Apagar seus dados e voltar ao exemplo?")) { const u = S.user; S = exemplo(); S.user = u; save(); render(); } }
+});
+app.addEventListener("input", ev => {
+  if (ev.target.id === "busca") {
+    window._q = ev.target.value;
+    const pos = ev.target.selectionStart;
+    render();
+    const el = document.getElementById("busca"); el.focus(); el.setSelectionRange(pos, pos);
+  }
+});
+app.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target.id === "nome") app.querySelector('[data-act="comecar"]').click(); });
+function lerNova() {
+  if (!novo) return;
+  const n = document.getElementById("nnome"); if (n) novo.name = n.value;
+  const h = document.getElementById("nhora"); if (h) novo.time = h.value;
+  document.querySelectorAll(".nitem").forEach(inp => { novo.items[+inp.dataset.i] = inp.value; });
+}
+function pedirPermissao(avisar) {
+  if (!("Notification" in window)) { if (avisar) toast("Este navegador não permite avisos. O aviso aparece com o app aberto."); return; }
+  if (Notification.permission === "granted") { if (avisar) toast("Avisos já estão ativados"); return; }
+  Notification.requestPermission().then(p => { if (avisar) toast(p === "granted" ? "Avisos ativados" : "Avisos bloqueados no navegador"); });
+}
+function exportar() {
+  const linhas = [["data", "rotina", "item", "situacao", "hora"]];
+  S.log.forEach(l => { const r = S.routines.find(x => x.id === l.rid); const it = r?.items.find(i => i.id === l.iid); if (r && it) linhas.push([l.date, r.name, it.text, l.st === "ok" ? "confirmado" : "pendente", l.ts ? hhmm(l.ts) : ""]); });
+  const csv = "﻿" + linhas.map(x => x.map(c => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = "ja-fiz-historico.csv"; a.click();
+}
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+render();
+checarHorario();
+</script>
+</body>
+</html>
